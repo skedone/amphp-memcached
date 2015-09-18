@@ -58,4 +58,20 @@ class Memcached
     {
         return $this->send(['stats']);
     }
+
+    /**
+     * @param $key
+     * @param $value
+     * @param $expire
+     * @return \Amp\Promise
+     */
+    public function set($key, $value, $expire = 0)
+    {
+        return $this->send([['set', $key, 0, $expire, strlen($value)],[$value]]);
+    }
+
+    public function get($key)
+    {
+        return $this->send(['get', $key, ' ']);
+    }
 }

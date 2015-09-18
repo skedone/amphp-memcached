@@ -81,13 +81,26 @@ class Connection {
      */
     public function send(array $strings) {
         return \Amp\pipe($this->connect(), function () use ($strings) {
-            $payload = join(' ', $strings) . "\r\n";
+            $payload = $this->parsePayload($strings);
             $this->outputBuffer .= $payload;
             $this->outputBufferLength += strlen($payload);
             if ($this->writer !== null) {
                 \Amp\enable($this->writer);
             }
         });
+    }
+
+    public function parsePayload(array $strings)
+    {
+        if(!is_array($strings[0])) {
+            return join(' ', $strings) . "\r\n";
+        }
+
+        $payload = '';
+        foreach($strings as $string) {
+            $payload .= join(' ', $string) . "\r\n";
+        }
+        return $payload;
     }
 
     /**
