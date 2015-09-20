@@ -72,6 +72,6 @@ class Memcached
 
     public function get($key)
     {
-        return $this->send(['get', $key, ' ']);
+        return $this->send(['get', $key]);
     }
 }

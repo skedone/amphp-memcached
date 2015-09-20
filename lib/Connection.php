@@ -108,28 +108,30 @@ class Connection {
      */
     private function connect()
     {
-        if($this->promisor instanceof \Amp\Deferred) {
-            return $this->promisor->promise();
+        // Already connected
+        if(is_resource($this->socket)) {
+            return new \Amp\Deferred();
         }
 
         $this->promisor = new \Amp\Deferred();
 
         /** @var $socketPromise Promise */
         $socketPromise = \Amp\Socket\connect($this->uri, ['timeout' => 1000]);
-        $socketPromise->when(function($error, $socket){
-
+        $socketPromise->when(function ($error, $socket) {
             $promisor = $this->promisor;
             $this->promisor = null;
 
             $this->socket = $socket;
             $this->reader = \Amp\onReadable($this->socket, [$this, "onRead"]);
-            $this->writer = \Amp\onWritable($this->socket, [$this, "onWrite"], ["enable" => !empty($this->outputBuffer)]);
+            $this->writer = \Amp\onWritable($this->socket, [$this, "onWrite"]);
 
             $promisor->succeed();
         });
 
         return $this->promisor->promise();
     }
+
+
 
     public function onRead()
     {
@@ -144,6 +146,7 @@ class Connection {
 
     public function onWrite($watcherId)
     {
+        // echo "WRITING: {$this->socket} " . $this->outputBuffer . "\n";
         if ($this->outputBufferLength === 0) {
             \Amp\disable($watcherId);
             return;

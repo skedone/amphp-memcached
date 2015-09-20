@@ -5,6 +5,10 @@ namespace Edo;
 
 class TextParser {
 
+    private $responses = [
+        'STORED' => true
+    ];
+
     /** @var string */
     private $buffer;
 
@@ -14,7 +18,7 @@ class TextParser {
 
     public function append($string)
     {
-        $this->buffer .= $string;
+        $this->buffer = $string;
         $cb = $this->responseCallback;
         $cb($this->buffer);
     }
