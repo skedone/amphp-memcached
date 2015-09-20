@@ -3,7 +3,7 @@
 namespace Edo;
 
 
-class TextParser {
+class AsciiParser {
 
     private $responses = [
         'STORED' => true

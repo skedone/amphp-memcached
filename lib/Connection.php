@@ -6,6 +6,7 @@ namespace Edo;
 use Amp\Promise;
 use Amp\Promisor;
 use Amp\Socket\ConnectException;
+use Amp\Success;
 
 class Connection {
 
@@ -52,7 +53,7 @@ class Connection {
         /**
          * Parser protocol, can be binary or text right now.
          */
-        $this->parser = new TextParser(function ($response) {
+        $this->parser = new AsciiParser(function ($response) {
             foreach ($this->handlers["response"] as $handler) {
                 $handler($response);
             }
@@ -110,7 +111,7 @@ class Connection {
     {
         // Already connected
         if(is_resource($this->socket)) {
-            return new \Amp\Deferred();
+            return new Success();
         }
 
         $this->promisor = new \Amp\Deferred();

@@ -8,10 +8,14 @@ for ($i=0;$i<$keys;$i++) $values[sprintf('%020s',$i)]=sha1($i);
 
 \Amp\run(function() use ($values){
     $memcached = new \Edo\Memcached('tcp://127.0.0.1:11211');
-    $set = (yield $memcached->set('key1', array_pop($values)));
+    $value = array_pop($values);
+    $set = (yield $memcached->set('key1', $value));
+    echo "\nSAVED " . $value;
     $get = (yield $memcached->get('key1'));
 
-    $set1 = (yield $memcached->set('key1', array_pop($values)));
+    $value = array_pop($values);
+    $set1 = (yield $memcached->set('key1', $value));
+    echo "\nSAVED " . $value;
     $get1 = (yield $memcached->get('key1'));
 
     echo "\n##########################################";
