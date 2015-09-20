@@ -147,7 +147,6 @@ class Connection {
 
     public function onWrite($watcherId)
     {
-        // echo "WRITING: {$this->socket} " . $this->outputBuffer . "\n";
         if ($this->outputBufferLength === 0) {
             \Amp\disable($watcherId);
             return;

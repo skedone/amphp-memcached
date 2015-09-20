@@ -26,6 +26,11 @@ for ($i=0;$i<$c;$i++) $values[sprintf('%020s',$i)]=sha1($i);
     $time = microtime(true)-$start;
     echo "amp-memcached get: $time\n";
 
+    \Amp\stop();
+});
+
+if(extension_loaded('memcached')) {
+
     $m = new Memcached();
     $m->addServer('127.0.0.1', 11211);
 
@@ -38,6 +43,7 @@ for ($i=0;$i<$c;$i++) $values[sprintf('%020s',$i)]=sha1($i);
     $time = microtime(true)-$start;
     echo "memcached get: $time\n";
 
-    echo memory_get_usage(true) / 1024 . " Mb \n";
-    echo memory_get_peak_usage(true) / 1024 . " Mb\n";
-});
+}
+
+echo memory_get_usage(true) / 1024 . " Mb \n";
+echo memory_get_peak_usage(true) / 1024 . " Mb\n";
