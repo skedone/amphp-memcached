@@ -14,6 +14,7 @@ class AsciiProtocol {
     const STORE_OK = 'STORED';
     const STORE_KO = 'NOT_STORED';
     const DELETED = 'DELETED';
+    const STAT = 'STAT';
 
 
     /** @var string */
@@ -36,6 +37,9 @@ class AsciiProtocol {
             case self::STORE_KO:
                 return false;
                 break;
+            case self::STAT:
+                return $string;
+                break;
             case self::VALUE:
                 $values = explode("\r\n", $string[3]);
                 return $values[1];
@@ -51,7 +55,6 @@ class AsciiProtocol {
     public function append($string)
     {
         $this->buffer = $string;
-
         $cb = $this->responseCallback;
         $cb($this->buffer);
     }

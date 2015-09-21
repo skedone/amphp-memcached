@@ -60,6 +60,9 @@ class Connection {
         });
     }
 
+    /**
+     *
+     */
     public function __destruct()
     {
         foreach($this->handlers as $handlers) {
@@ -67,10 +70,12 @@ class Connection {
         }
 
         $this->parser = null;
-
-        echo "\nDestruct connection";
     }
 
+    /**
+     * @param $uri
+     * @return void
+     */
     public function setUri($uri)
     {
         $this->uri = $uri;
@@ -107,6 +112,10 @@ class Connection {
         });
     }
 
+    /**
+     * @param array $strings
+     * @return string
+     */
     public function parsePayload(array $strings)
     {
         if(!is_array($strings[0])) {
@@ -117,6 +126,7 @@ class Connection {
         foreach($strings as $string) {
             $payload .= join(' ', $string) . "\r\n";
         }
+
         return $payload;
     }
 
@@ -152,8 +162,9 @@ class Connection {
         return $this->promisor->promise();
     }
 
-
-
+    /**
+     * @param $watcherId
+     */
     public function onRead($watcherId)
     {
         $read = fread($this->socket, 8192);
@@ -168,6 +179,9 @@ class Connection {
         }
     }
 
+    /**
+     * @param $watcherId
+     */
     public function onWrite($watcherId)
     {
         if ($this->outputBufferLength === 0) {
