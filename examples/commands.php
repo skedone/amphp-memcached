@@ -9,10 +9,6 @@ for ($i=0;$i<$keys;$i++) $values[sprintf('%020s',$i)]=sha1($i);
 \Amp\run(function() use ($values){
     $memcached = new \Edo\Memcached();
     $memcached->addServer('tcp://127.0.0.1', 11211);
-    $memcached->addServer('tcp://127.0.0.1', 11211);
-    $memcached->addServer('tcp://127.0.0.1', 11211);
-    $memcached->addServer('tcp://127.0.0.1', 11211);
-    $memcached->addServer('tcp://127.0.0.1', 11211);
 
     $set = (yield $memcached->set('key_set', 'value_set'));
     echo "##### SET\n";

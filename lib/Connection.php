@@ -7,6 +7,7 @@ use Amp\Promise;
 use Amp\Promisor;
 use Amp\Socket\ConnectException;
 use Amp\Success;
+use Edo\Protocol\AsciiProtocol;
 
 class Connection {
 
@@ -52,11 +53,22 @@ class Connection {
         /**
          * Parser protocol, can be binary or text right now.
          */
-        $this->parser = new AsciiParser(function ($response) {
+        $this->parser = new AsciiProtocol(function ($response) {
             foreach ($this->handlers["response"] as $handler) {
                 $handler($response);
             }
         });
+    }
+
+    public function __destruct()
+    {
+        foreach($this->handlers as $handlers) {
+            unset($handlers);
+        }
+
+        $this->parser = null;
+
+        echo "\nDestruct connection";
     }
 
     public function setUri($uri)

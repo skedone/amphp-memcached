@@ -3,25 +3,34 @@
 namespace Edo;
 
 use Amp\Socket\ConnectException;
+use Edo\Protocol\AsciiProtocol;
 
+/**
+ * Class Memcached
+ * @package Edo
+ */
 class Memcached
 {
 
     /** @var array */
     private $promisors;
 
+    /** @var array */
     private $connections = [];
 
     public function __construct($parser = null)
     {
         if($parser === null) {
-            $this->parser = new TextParser();
+            $this->parser = new AsciiProtocol();
         }
     }
 
     public function addConnection($host, $port)
     {
         $connection = new Connection();
+        if (strpos($host, "tcp://") !== 0 && strpos($host, "unix://") !== 0) {
+            throw new \DomainException("Host must start with tcp:// or unix://");
+        }
         $connection->setUri("$host:$port");
         $connection->addEventHandler("response", function ($response) {
             $promisor = array_shift($this->promisors);
@@ -31,7 +40,18 @@ class Memcached
                 $promisor->succeed($response);
             }
         });
+
         $this->connections[] = $connection;
+    }
+
+    /**
+     *
+     */
+    public function __destruct()
+    {
+        foreach($this->connections as $connection) {
+            unset($connection);
+        }
     }
 
     /**
@@ -39,11 +59,14 @@ class Memcached
      */
     public function getConnection()
     {
-        $connection = $this->connections[array_rand($this->connections)];
-        // var_dump($connection->socket);
-        return $connection;
+        return $this->connections[array_rand($this->connections)];
     }
 
+    /**
+     * @param array $args
+     * @param callable $transform
+     * @return \Amp\Promise
+     */
     public function send(array $args, callable $transform = null)
     {
         $promisor = new \Amp\Deferred();
@@ -59,6 +82,7 @@ class Memcached
      * @param $host
      * @param $port
      * @param int $weight
+     * @return void
      */
     public function addServer($host, $port, $weight = 0)
     {
@@ -67,11 +91,12 @@ class Memcached
 
     /**
      * @param array $servers
+     * @return void
      */
     public function addServers(array $servers)
     {
         foreach ($servers as $server) {
-            $this->servers[] = $server;
+            $this->addServer($server['host'], $server['port'], ($server['weight'] ?: 0) );
         }
     }
 
@@ -86,21 +111,43 @@ class Memcached
         return $this->send([['set', $key, 0, $expire, strlen($value)],[$value]]);
     }
 
+    /**
+     * @param $key
+     * @param $value
+     * @param int $expiration
+     * @return \Amp\Promise
+     */
     public function add($key, $value, $expiration = 0)
     {
         return $this->send([['add', $key, 0, $expiration, strlen($value)], [$value]]);
     }
 
+    /**
+     * @param $key
+     * @param $value
+     * @param int $expiration
+     * @return \Amp\Promise
+     */
     public function replace($key , $value , $expiration = 0)
     {
         return $this->send([['replace', $key, 0, $expiration, strlen($value)], [$value]]);
     }
 
+    /**
+     * @param $key
+     * @param $value
+     * @return \Amp\Promise
+     */
     public function append($key , $value)
     {
         return $this->send([['append', $key, 0, 0, strlen($value)], [$value]]);
     }
 
+    /**
+     * @param $key
+     * @param $value
+     * @return \Amp\Promise
+     */
     public function prepend($key , $value)
     {
         return $this->send([['prepend', $key, 0, 0, strlen($value)], [$value]]);

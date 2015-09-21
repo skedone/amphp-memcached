@@ -5,7 +5,7 @@ $i = 0;
 // \Amp\reactor(new \Amp\NativeReactor());
 echo get_class(\Amp\reactor()) . "\n";
 
-$c = 10000;
+$c = 100000;
 $values = array();
 for ($i=0;$i<$c;$i++) $values[sprintf('%020s',$i)]=sha1($i);
 
@@ -13,8 +13,6 @@ for ($i=0;$i<$c;$i++) $values[sprintf('%020s',$i)]=sha1($i);
 \Amp\run(function() use (&$i, $values) {
 
     $memcached = new \Edo\Memcached();
-    $memcached->addServer('tcp://127.0.0.1', 11211);
-    $memcached->addServer('tcp://127.0.0.1', 11211);
     $memcached->addServer('tcp://127.0.0.1', 11211);
 
     $start = microtime(true);
@@ -49,6 +47,8 @@ if(extension_loaded('memcached')) {
     echo "memcached get: $time\n";
 
 }
+
+unset ($values);
 
 echo memory_get_usage(true) / 1024 . " Mb \n";
 echo memory_get_peak_usage(true) / 1024 . " Mb\n";
