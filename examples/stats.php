@@ -31,7 +31,7 @@ for ($i=0;$i<$c;$i++) $values[sprintf('%020s',$i)]=sha1($i);
     $time = microtime(true)-$start;
     echo "amp-memcached get: $time\n";
 
-    \Amp\stop();
+   \Amp\stop();
 });
 
 if(extension_loaded('memcached')) {

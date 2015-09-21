@@ -69,6 +69,9 @@ class Connection {
             unset($handlers);
         }
 
+        \Amp\disable($this->writer);
+        \Amp\disable($this->reader);
+
         $this->parser = null;
     }
 
@@ -106,6 +109,9 @@ class Connection {
             $payload = $this->parsePayload($strings);
             $this->outputBuffer .= $payload;
             $this->outputBufferLength += strlen($payload);
+            if($this->reader !== null) {
+                \Amp\enable($this->reader);
+            }
             if ($this->writer !== null) {
                 \Amp\enable($this->writer);
             }
@@ -167,15 +173,12 @@ class Connection {
      */
     public function onRead($watcherId)
     {
-        $read = fread($this->socket, 8192);
+        $read = fread($this->socket, 1048576);
         if ($read != "") {
             $this->parser->append($read);
         } elseif (!is_resource($this->socket) || @feof($this->socket)) {
             $this->state = self::STATE_DISCONNECTED;
             throw new ConnectException("Connection went away (read)", $code = 2);
-        } elseif($read === '') {
-            \Amp\disable($watcherId);
-            return;
         }
     }
 

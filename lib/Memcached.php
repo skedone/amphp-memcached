@@ -26,7 +26,7 @@ class Memcached
     {
         $connection = new Connection();
         if (strpos($host, "tcp://") !== 0 && strpos($host, "unix://") !== 0) {
-            throw new \DomainException("Host must start with tcp:// or unix://");
+            throw new \DomainException("Uri must start with tcp:// or unix://");
         }
         $connection->setUri("$host:$port");
         $connection->addEventHandler("response", function ($response) {
@@ -98,6 +98,8 @@ class Memcached
     }
 
     /**
+     * Store value against key
+     *
      * @param $key
      * @param $value
      * @param $expire
@@ -110,6 +112,8 @@ class Memcached
     }
 
     /**
+     * Store this value against key if the key does not already exist
+     *
      * @param $key
      * @param $value
      * @param int $expiration
@@ -122,6 +126,8 @@ class Memcached
     }
 
     /**
+     * Store this value against key if the key already exists
+     *
      * @param $key
      * @param $value
      * @param int $expiration
@@ -134,6 +140,9 @@ class Memcached
     }
 
     /**
+     * Append the supplied value to the end of the value for the specified key.
+     * The flags and expiration time arguments should not be used.
+     *
      * @param $key
      * @param $value
      * @return \Amp\Promise

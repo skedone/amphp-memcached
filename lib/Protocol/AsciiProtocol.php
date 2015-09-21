@@ -7,7 +7,7 @@ class AsciiProtocol {
 
     const VALUE = 'VALUE';
     const EXISTS = 'EXISTS';
-    const NOT_FOUND = 'NOT_FOUND';
+    const NOT_FOUND = 'NOT FOUND';
     const ERROR = 'ERROR';
     const ERROR_SERVER = 'SERVER_ERROR';
     const ERROR_CLIENT = 'CLIENT_ERROR';
@@ -16,6 +16,7 @@ class AsciiProtocol {
     const DELETED = 'DELETED';
     const STAT = 'STAT';
     const TOUCHED = 'TOUCHED';
+    const END = 'END';
 
 
     /** @var string */
@@ -37,7 +38,7 @@ class AsciiProtocol {
     public function parse($string)
     {
         $string = explode(" ", substr($string, 0, strlen($string) - 2 ));
-        // print_r($string);
+
         switch($string[0]) {
             case self::STORE_OK;
             case self::TOUCHED;
@@ -45,6 +46,7 @@ class AsciiProtocol {
                 return true;
                 break;
             case self::STORE_KO;
+            case self::END;
             case self::NOT_FOUND:
                 return false;
                 break;
