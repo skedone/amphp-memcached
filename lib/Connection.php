@@ -33,14 +33,13 @@ class Connection {
     private $reader;
 
     /** @var resource */
-    private $socket;
+    public $socket;
 
     /**
      * @param $uri string
      */
-    public function __construct($uri)
+    public function __construct()
     {
-        $this->uri = $uri;
         $this->outputBuffer = '';
         $this->outputBufferLength = 0;
         $this->state = self::STATE_DISCONNECTED;
@@ -58,6 +57,11 @@ class Connection {
                 $handler($response);
             }
         });
+    }
+
+    public function setUri($uri)
+    {
+        $this->uri = $uri;
     }
 
     /**

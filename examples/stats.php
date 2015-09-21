@@ -12,7 +12,11 @@ for ($i=0;$i<$c;$i++) $values[sprintf('%020s',$i)]=sha1($i);
 \Amp\reactor(new \Amp\NativeReactor());
 \Amp\run(function() use (&$i, $values) {
 
-    $memcached = new \Edo\Memcached('tcp://127.0.0.1:11211');
+    $memcached = new \Edo\Memcached();
+    $memcached->addServer('tcp://127.0.0.1', 11211);
+    $memcached->addServer('tcp://127.0.0.1', 11211);
+    $memcached->addServer('tcp://127.0.0.1', 11211);
+
     $start = microtime(true);
     foreach ($values as $k => $v){
         $stats = (yield $memcached->set($k, $v, 3600));

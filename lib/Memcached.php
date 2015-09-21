@@ -10,10 +10,20 @@ class Memcached
     /** @var array */
     private $promisors;
 
-    public function __construct($uri, $parser = null)
+    private $connections = [];
+
+    public function __construct($parser = null)
     {
-        $this->connection = new Connection($uri);
-        $this->connection->addEventHandler("response", function ($response) {
+        if($parser === null) {
+            $this->parser = new TextParser();
+        }
+    }
+
+    public function addConnection($host, $port)
+    {
+        $connection = new Connection();
+        $connection->setUri("$host:$port");
+        $connection->addEventHandler("response", function ($response) {
             $promisor = array_shift($this->promisors);
             if ($response instanceof \Exception) {
                 $promisor->fail($response);
@@ -21,17 +31,24 @@ class Memcached
                 $promisor->succeed($response);
             }
         });
+        $this->connections[] = $connection;
+    }
 
-        if($parser === null) {
-            $this->parser = new TextParser();
-        }
+    /**
+     * @return Connection
+     */
+    public function getConnection()
+    {
+        $connection = $this->connections[array_rand($this->connections)];
+        // var_dump($connection->socket);
+        return $connection;
     }
 
     public function send(array $args, callable $transform = null)
     {
         $promisor = new \Amp\Deferred();
         $this->promisors[] = $promisor;
-        $this->connection->send($args);
+        $this->getConnection()->send($args);
         return \Amp\pipe($promisor->promise(), function($response) {
             return $this->parser->parse($response);
         });
@@ -45,7 +62,7 @@ class Memcached
      */
     public function addServer($host, $port, $weight = 0)
     {
-        $this->servers = "$host:$port";
+        $this->addConnection($host, $port);
     }
 
     /**

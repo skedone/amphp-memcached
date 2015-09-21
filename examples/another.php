@@ -18,7 +18,10 @@ echo get_class(\Amp\reactor());
 
 
 \Amp\run(function() use (&$i, &$header) {
-    $memcached = new \Edo\Memcached('tcp://127.0.0.1:11211');
+    $memcached = new \Edo\Memcached();
+    $memcached->addServer('tcp://127.0.0.1', 11211);
+    $memcached->addServer('tcp://127.0.0.1', 11211);
+
     $header = "\n#### SET";
     $promises = [];
     $inc = 0;
@@ -29,7 +32,9 @@ echo get_class(\Amp\reactor());
 });
 
 \Amp\run(function() use (&$i, &$header) {
-    $memcached = new \Edo\Memcached('tcp://127.0.0.1:11211');
+    $memcached = new \Edo\Memcached();
+    $memcached->addServer('tcp://127.0.0.1', 11211);
+    $memcached->addServer('tcp://127.0.0.1', 11211);
     $header = "\n#### GET";
     $promises = [];
     $inc = 0;
