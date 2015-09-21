@@ -10,7 +10,7 @@ class Memcached
     /** @var array */
     private $promisors;
 
-    public function __construct($uri)
+    public function __construct($uri, $parser = null)
     {
         $this->connection = new Connection($uri);
         $this->connection->addEventHandler("response", function ($response) {
@@ -21,6 +21,10 @@ class Memcached
                 $promisor->succeed($response);
             }
         });
+
+        if($parser === null) {
+            $this->parser = new TextParser();
+        }
     }
 
     public function send(array $args, callable $transform = null)
@@ -28,9 +32,9 @@ class Memcached
         $promisor = new \Amp\Deferred();
         $this->promisors[] = $promisor;
         $this->connection->send($args);
-        return $transform
-            ? \Amp\pipe($promisor->promise(), $transform)
-            : $promisor->promise();
+        return \Amp\pipe($promisor->promise(), function($response) {
+            return $this->parser->parse($response);
+        });
     }
 
 
@@ -54,11 +58,6 @@ class Memcached
         }
     }
 
-    public function getStats()
-    {
-        return $this->send(['stats']);
-    }
-
     /**
      * @param $key
      * @param $value
@@ -70,8 +69,34 @@ class Memcached
         return $this->send([['set', $key, 0, $expire, strlen($value)],[$value]]);
     }
 
+    public function add($key, $value, $expiration = 0)
+    {
+        return $this->send([['add', $key, 0, $expiration, strlen($value)], [$value]]);
+    }
+
+    public function replace($key , $value , $expiration = 0)
+    {
+        return $this->send([['replace', $key, 0, $expiration, strlen($value)], [$value]]);
+    }
+
+    public function append($key , $value)
+    {
+        return $this->send([['append', $key, 0, 0, strlen($value)], [$value]]);
+    }
+
+    public function prepend($key , $value)
+    {
+        return $this->send([['prepend', $key, 0, 0, strlen($value)], [$value]]);
+    }
+
     public function get($key)
     {
         return $this->send(['get', $key]);
     }
+
+    public function getStats()
+    {
+        return $this->send(['stats']);
+    }
+
 }

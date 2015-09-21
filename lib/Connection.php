@@ -109,6 +109,10 @@ class Connection {
      */
     private function connect()
     {
+        if($this->promisor) {
+            return $this->promisor->promise();
+        }
+
         // Already connected
         if(is_resource($this->socket)) {
             return new Success();
@@ -134,7 +138,7 @@ class Connection {
 
 
 
-    public function onRead()
+    public function onRead($watcherId)
     {
         $read = fread($this->socket, 8192);
         if ($read != "") {
@@ -142,6 +146,9 @@ class Connection {
         } elseif (!is_resource($this->socket) || @feof($this->socket)) {
             $this->state = self::STATE_DISCONNECTED;
             throw new ConnectException("Connection went away (read)", $code = 2);
+        } elseif($read === '') {
+            \Amp\disable($watcherId);
+            return;
         }
     }
 
