@@ -2,7 +2,6 @@
 
 namespace Edo;
 
-use Amp\Socket\ConnectException;
 use Edo\Protocol\AsciiProtocol;
 
 /**
@@ -18,11 +17,9 @@ class Memcached
     /** @var array */
     private $connections = [];
 
-    public function __construct($parser = null)
+    public function __construct()
     {
-        if($parser === null) {
-            $this->parser = new AsciiProtocol();
-        }
+        $this->parser = new AsciiProtocol();
     }
 
     public function addConnection($host, $port)
@@ -105,6 +102,7 @@ class Memcached
      * @param $value
      * @param $expire
      * @return \Amp\Promise
+     * @yield array
      */
     public function set($key, $value, $expire = 0)
     {
@@ -116,6 +114,7 @@ class Memcached
      * @param $value
      * @param int $expiration
      * @return \Amp\Promise
+     * @yield array
      */
     public function add($key, $value, $expiration = 0)
     {
@@ -127,6 +126,7 @@ class Memcached
      * @param $value
      * @param int $expiration
      * @return \Amp\Promise
+     * @yield array
      */
     public function replace($key , $value , $expiration = 0)
     {
@@ -137,6 +137,7 @@ class Memcached
      * @param $key
      * @param $value
      * @return \Amp\Promise
+     * @yield array
      */
     public function append($key , $value)
     {
@@ -147,17 +148,99 @@ class Memcached
      * @param $key
      * @param $value
      * @return \Amp\Promise
+     * @yield array
      */
     public function prepend($key , $value)
     {
         return $this->send([['prepend', $key, 0, 0, strlen($value)], [$value]]);
     }
 
-    public function get($key)
+    /**
+     * @param $key
+     * @param callable $callback
+     * @return \Amp\Promise
+     * @yield string
+     */
+    public function get($key, callable $callback = null)
     {
         return $this->send(['get', $key]);
     }
 
+    /**
+     * @param array $keys
+     * @param callable $callback
+     * @return \Amp\Promise
+     */
+    public function getMulti(array $keys, callable $callback = null)
+    {
+        $promises = [];
+        foreach($keys as $key) {
+            $promises[] = $this->send(['get', $key]);
+        }
+        return \Amp\all($promises);
+    }
+
+    /**
+     * @param $key
+     * @param callable $callback
+     * @return \Amp\Promise
+     * @yield array
+     */
+    public function gets($key, callable $callback = null)
+    {
+        return $this->send(['gets', $key]);
+    }
+
+    /**
+     * @param array $keys
+     * @param callable $callback
+     * @return \Amp\Promise
+     */
+    public function getsMulti(array $keys, callable $callback = null)
+    {
+        $promises = [];
+        foreach($keys as $key) {
+            $promises[] = $this->send(['gets', $key]);
+        }
+        return \Amp\all($promises);
+    }
+
+    /**
+     * @param $key
+     * @return \Amp\Promise
+     */
+    public function delete($key)
+    {
+        return $this->send(['delete', $key]);
+    }
+
+    /**
+     * @param array $keys
+     * @return \Amp\Promise
+     */
+    public function deleteMulti(array $keys)
+    {
+        $promises = [];
+        foreach($keys as $key) {
+            $promises[] = $this->send(['delete', $key]);
+        }
+        return \Amp\all($promises);
+    }
+
+    /**
+     * @param $key
+     * @param $expiration
+     * @return \Amp\Promise
+     */
+    public function touch($key, $expiration)
+    {
+        return $this->send(['touch', $key, $expiration]);
+    }
+
+    /**
+     * @return \Amp\Promise
+     * @yield array
+     */
     public function getStats()
     {
         return $this->send(['stats']);

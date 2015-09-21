@@ -14,8 +14,8 @@ for ($i=0;$i<$c;$i++) $values[sprintf('%020s',$i)]=sha1($i);
     $memcached = new \Edo\Memcached();
     $memcached->addServer('tcp://127.0.0.1', 11211);
 
-    $stats = (yield $memcached->getStats());
-    print_r($stats);
+    $stats = (yield $memcached->set('key2', 'key2_stored', 3600));
+    $stats = (yield $memcached->set('key1', 'key1_stored', 3600));
 
     $start = microtime(true);
     foreach ($values as $k => $v){
@@ -50,7 +50,7 @@ if(extension_loaded('memcached')) {
 
 }
 
-unset ($values);
+$values = [];
 
 echo memory_get_usage(true) / 1024 . " Mb \n";
 echo memory_get_peak_usage(true) / 1024 . " Mb\n";
