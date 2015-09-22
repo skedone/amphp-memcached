@@ -14,9 +14,6 @@ for ($iterator=0;$iterator<$operations;$iterator++) $values[sprintf('%020s',$ite
     $memcached = new \Edo\Memcached();
     $memcached->addServer('tcp://127.0.0.1', 11211);
 
-    $stats = (yield $memcached->getStats());
-    var_dump($stats); die();
-
     $start = microtime(true);
     foreach ($values as $k => $v){
         $stats = (yield $memcached->set($k, $v, 3600));
@@ -34,6 +31,20 @@ for ($iterator=0;$iterator<$operations;$iterator++) $values[sprintf('%020s',$ite
    \Amp\stop();
 
 });
+
+if(extension_loaded('memcache')) {
+    $memached = new Memcache();
+    $memached->addServer('127.0.0.1', 11211);
+
+    $start = microtime(true);
+    foreach ($values as $k => $v) $memached->set($k, $v, 3600);
+    $time = microtime(true)-$start;
+    echo "memcache set: $time\n";
+    $start = microtime(true);
+    foreach ($values as $k => $v) $memached->get($k);
+    $time = microtime(true)-$start;
+    echo "memcache get: $time\n";
+}
 
 if(extension_loaded('memcached')) {
 
