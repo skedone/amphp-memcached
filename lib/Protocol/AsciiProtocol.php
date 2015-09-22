@@ -37,9 +37,8 @@ class AsciiProtocol {
      */
     public function parse($string)
     {
-        $string = explode(" ", substr($string, 0, strlen($string) - 2 ));
-        //print_r($string);
-        switch($string[0]) {
+        $strings = explode(" ", substr($string, 0, strlen($string) - 2 ));
+        switch($strings[0]) {
             case self::STORE_OK;
             case self::TOUCHED;
             case self::DELETED:
@@ -51,12 +50,10 @@ class AsciiProtocol {
                 return false;
                 break;
             case self::STAT:
-                return $string;
+                return $this->stats($string);
                 break;
             case self::VALUE:
-                $cas = empty($string[4]) ? false : true;
-                $values = $cas ? explode("\r\n", $string[4]) : explode("\r\n", $string[3]);
-                return (isset($values[1]) ? ($cas ? [$values[1], $values[0]] : $values[1]) : false);
+                return $this->value($string);
                 break;
             case self::ERROR;
             case self::ERROR_CLIENT;
@@ -64,6 +61,40 @@ class AsciiProtocol {
                 return false;
 
         }
+
+        return false;
+    }
+
+    public function value($string)
+    {
+        $lines = explode("\r\n", substr($string, 0, strlen($string) - 2 ));
+        if(isset($lines[3])) {
+            $checkCas = (count(explode(' ', $lines[0])) == 4 ? true : false);
+
+            $response = [];
+            $cas = $key = $value = null;
+            foreach($lines as $k => $line) {
+                if($line == 'END') continue;
+                if($k % 2 === 0) {
+                    $vals = \explode(' ', $line);
+                    $key = $vals[1];
+                    continue;
+                }
+
+                $response[$key] = $line;
+            }
+            return $response;
+        }
+
+        $strings = explode(" ", substr($string, 0, strlen($string) - 2 ));
+        $cas = empty($strings[4]) ? false : true;
+        $values = $cas ? explode("\r\n", $strings[4]) : explode("\r\n", $strings[3]);
+        return (isset($values[1]) ? ($cas ? [$values[1], $values[0]] : $values[1]) : false);
+    }
+
+    public function stats($string)
+    {
+        return $string;
     }
 
     public function append($string)

@@ -172,4 +172,27 @@ class CommandTest extends \PHPUnit_Framework_TestCase {
         });
     }
 
+    public function testGetMultiCommand()
+    {
+        \Amp\run(function() {
+            $range = range(0, 5);
+            $keys = [];
+            foreach($range as $num) {
+                $keys["key_multi_{$num}"] = "value_multi_{$num}";
+            }
+            foreach($keys as $key => $value) {
+                $set = (yield $this->memcached->set($key, $value, 10));
+            }
+
+            $results = (yield $this->memcached->getMulti(array_keys($keys)));
+
+            $this->assertInternalType('array', $results);
+            foreach($keys as $key => $value) {
+                $this->assertEquals($value, $results[$key]);
+            }
+
+            \Amp\stop();
+        });
+    }
+
 }

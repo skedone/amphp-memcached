@@ -182,11 +182,7 @@ class Memcached
      */
     public function getMulti(array $keys, callable $callback = null)
     {
-        $promises = [];
-        foreach($keys as $key) {
-            $promises[] = $this->send(['get', $key]);
-        }
-        return \Amp\all($promises);
+        return $this->send(['get', \join(' ', $keys)]);
     }
 
     /**
@@ -204,14 +200,11 @@ class Memcached
      * @param array $keys
      * @param callable $callback
      * @return \Amp\Promise
+     * @yield array
      */
     public function getsMulti(array $keys, callable $callback = null)
     {
-        $promises = [];
-        foreach($keys as $key) {
-            $promises[] = $this->send(['gets', $key]);
-        }
-        return \Amp\all($promises);
+            return $this->send(['gets', \join(' ', $keys)]);
     }
 
     /**
