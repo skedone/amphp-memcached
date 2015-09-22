@@ -69,7 +69,7 @@ class AsciiProtocol {
     {
         $lines = explode("\r\n", substr($string, 0, strlen($string) - 2 ));
         if(isset($lines[3])) {
-            $checkCas = (count(explode(' ', $lines[0])) == 4 ? true : false);
+            // $checkCas = (count(explode(' ', $lines[0])) == 4 ? true : false);
 
             $response = [];
             $cas = $key = $value = null;
@@ -94,7 +94,15 @@ class AsciiProtocol {
 
     public function stats($string)
     {
-        return $string;
+        $strings = explode("\r\n", substr($string, 0, strlen($string) - 2 ));
+        $stats = [];
+        foreach($strings as $line) {
+            if($line == self::END) continue;
+            $stat = \explode(' ', $line);
+            $stats[$stat[1]] =  $stat[2];
+        }
+
+        return $stats;
     }
 
     public function append($string)

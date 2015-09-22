@@ -14,23 +14,9 @@ for ($iterator=0;$iterator<$operations;$iterator++) $values[sprintf('%020s',$ite
     $memcached = new \Edo\Memcached();
     $memcached->addServer('tcp://127.0.0.1', 11211);
 
-    $stats = (yield $memcached->set('key', 'key stored', 10));
-    $stats = (yield $memcached->set('key1', 'key1 stored', 10));
-    $stats = (yield $memcached->set('key2', 'key2 stored', 10));
+    $stats = (yield $memcached->getStats());
+    var_dump($stats); die();
 
-    $single = (yield $memcached->get('key'));
-    //var_dump($single);
-    $get = (yield $memcached->getMulti(['key', 'not_key', 'key1', 'key2']));
-    die();
-    $gets = (yield $memcached->getsMulti(['key','not_', 'key1', 'key2']));
-    //var_dump($gets);
-
-    \Amp\once(function() use ($memcached){
-        $get = (yield $memcached->get('key2'));
-        var_dump($get);
-    }, 3000);
-
-    die();
     $start = microtime(true);
     foreach ($values as $k => $v){
         $stats = (yield $memcached->set($k, $v, 3600));

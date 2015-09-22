@@ -195,4 +195,14 @@ class CommandTest extends \PHPUnit_Framework_TestCase {
         });
     }
 
+    public function testGetStats()
+    {
+        \Amp\run(function() {
+            $stats = (yield $this->memcached->getStats());
+            $this->assertInternalType('array', $stats);
+            $this->assertArrayHasKey('pid', $stats);
+            \Amp\stop();
+        });
+    }
+
 }
