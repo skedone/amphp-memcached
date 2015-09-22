@@ -15,9 +15,6 @@ class CommandTest extends \PHPUnit_Framework_TestCase {
     /** @var \Edo\Memcached */
     public $memcached;
 
-    /**
-     *
-     */
     public function testSetCommand()
     {
         \Amp\run(function(){
