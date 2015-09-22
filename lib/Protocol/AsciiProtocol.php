@@ -57,12 +57,11 @@ class AsciiProtocol {
                 break;
             case self::ERROR;
             case self::ERROR_CLIENT;
-            case self::ERROR_SERVER:
+            case self::ERROR_SERVER;
+            default:
                 return false;
 
         }
-
-        return false;
     }
 
     public function value($string)
