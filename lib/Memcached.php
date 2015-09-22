@@ -76,8 +76,8 @@ class Memcached
 
 
     /**
-     * @param $host
-     * @param $port
+     * @param string $host
+     * @param int $port
      * @param int $weight
      * @return void
      */
@@ -100,21 +100,21 @@ class Memcached
     /**
      * Store value against key
      *
-     * @param $key
+     * @param string $key
      * @param $value
-     * @param $expire
+     * @param $expiration
      * @return \Amp\Promise
      * @yield array
      */
-    public function set($key, $value, $expire = 0)
+    public function set($key, $value, $expiration = 0)
     {
-        return $this->send([['set', $key, 0, $expire, strlen($value)],[$value]]);
+        return $this->send([['set', $key, 0, $expiration, strlen($value)],[$value]]);
     }
 
     /**
      * Store this value against key if the key does not already exist
      *
-     * @param $key
+     * @param string $key
      * @param $value
      * @param int $expiration
      * @return \Amp\Promise
@@ -128,7 +128,7 @@ class Memcached
     /**
      * Store this value against key if the key already exists
      *
-     * @param $key
+     * @param string $key
      * @param $value
      * @param int $expiration
      * @return \Amp\Promise
@@ -143,7 +143,7 @@ class Memcached
      * Append the supplied value to the end of the value for the specified key.
      * The flags and expiration time arguments should not be used.
      *
-     * @param $key
+     * @param string $key
      * @param $value
      * @return \Amp\Promise
      * @yield array
@@ -154,7 +154,7 @@ class Memcached
     }
 
     /**
-     * @param $key
+     * @param string $key
      * @param $value
      * @return \Amp\Promise
      * @yield array
@@ -165,10 +165,10 @@ class Memcached
     }
 
     /**
-     * @param $key
+     * @param string $key
      * @param callable $callback
      * @return \Amp\Promise
-     * @yield string
+     * @yield string|falase
      */
     public function get($key, callable $callback = null)
     {
@@ -190,7 +190,7 @@ class Memcached
     }
 
     /**
-     * @param $key
+     * @param string $key
      * @param callable $callback
      * @return \Amp\Promise
      * @yield array
@@ -215,12 +215,15 @@ class Memcached
     }
 
     /**
-     * @param $key
+     * Delete the key
+     *
+     * @param string $key
+     * @param int $time
      * @return \Amp\Promise
      */
-    public function delete($key)
+    public function delete($key, $time = 0)
     {
-        return $this->send(['delete', $key]);
+        return $this->send(['delete', $key, $time]);
     }
 
     /**
@@ -237,6 +240,8 @@ class Memcached
     }
 
     /**
+     * The "touch" command is used to update the expiration time of an existing item without fetching it.
+     *
      * @param $key
      * @param $expiration
      * @return \Amp\Promise

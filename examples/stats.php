@@ -14,9 +14,16 @@ for ($iterator=0;$iterator<$operations;$iterator++) $values[sprintf('%020s',$ite
     $memcached = new \Edo\Memcached();
     $memcached->addServer('tcp://127.0.0.1', 11211);
 
-    $stats = (yield $memcached->set('key2', 'key2_stored', 3600));
-    $stats = (yield $memcached->set('key1', 'key1_stored', 3600));
+    $stats = (yield $memcached->set('key2', 'key2_stored', 1));
+    $touch = (yield $memcached->touch('key2', 2));
+    var_dump($touch);
 
+    \Amp\once(function() use ($memcached){
+        $get = (yield $memcached->get('key2'));
+        var_dump($get);
+    }, 3000);
+
+    /**
     $start = microtime(true);
     foreach ($values as $k => $v){
         $stats = (yield $memcached->set($k, $v, 3600));
@@ -32,6 +39,7 @@ for ($iterator=0;$iterator<$operations;$iterator++) $values[sprintf('%020s',$ite
     echo "amp-memcached get: $time\n";
 
    \Amp\stop();
+     * */
 });
 
 if(extension_loaded('memcached')) {

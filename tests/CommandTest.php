@@ -150,4 +150,26 @@ class CommandTest extends \PHPUnit_Framework_TestCase {
         });
     }
 
+    public function testTouchCommand()
+    {
+        \Amp\run(function(){
+            $set = (yield $this->memcached->set('key_touch', 'value_touch', 0));
+            $get = (yield $this->memcached->get('key_touch'));
+            $this->assertEquals('value_touch', $get);
+
+            $touch = (yield $this->memcached->touch('key_touch', 1));
+            $this->assertInternalType('bool', $touch);
+            $this->assertTrue($touch);
+
+            $get = (yield $this->memcached->get('key_touch'));
+            $this->assertEquals('value_touch', $get);
+            \Amp\once(function(){
+                $get = (yield $this->memcached->get('key_touch'));
+                $this->assertFalse($get);
+                \Amp\stop();
+            }, 1000);
+
+        });
+    }
+
 }

@@ -38,7 +38,7 @@ class AsciiProtocol {
     public function parse($string)
     {
         $string = explode(" ", substr($string, 0, strlen($string) - 2 ));
-
+        //print_r($string);
         switch($string[0]) {
             case self::STORE_OK;
             case self::TOUCHED;
